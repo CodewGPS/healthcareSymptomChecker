@@ -1,27 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { OpenAI } from 'openai'
 import admin from 'firebase-admin'
-import { currentUser } from '@clerk/nextjs/server' // Add this import for user ID
+import { currentUser } from '@clerk/nextjs/server'
 
-// Initialize Firebase Admin once
-import type { ServiceAccount } from 'firebase-admin'
-import serviceAccountJson from '@/firebase-service-account.json'
-const serviceAccount = serviceAccountJson as ServiceAccount
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || '{}')
 
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    databaseURL: process.env.FIREBASE_DB_URL
+    databaseURL: process.env.FIREBASE_DB_URL,
   })
 }
 const db = admin.firestore()
 
-// Initialize OpenAI
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-// Symptom analysis function (UNTOUCHED - your existing logic)
 async function analyzeSymptoms(symptoms: string) {
   if (!symptoms) throw new Error('Symptoms required')
 
@@ -58,10 +54,10 @@ User Symptoms: ${symptoms}
   return response.choices[0].message.content
 }
 
-// API POST handler (UPDATED - add user-specific saving)
+
 export async function POST(request: NextRequest) {
   try {
-    // Get current user from Clerk (this doesn't break anything)
+
     const clerkUser = await currentUser()
     
     if (!clerkUser?.id) {
@@ -74,10 +70,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Symptoms required' }, { status: 400 })
     }
 
-    // Your existing AI analysis logic (completely untouched)
+    
     const answer = await analyzeSymptoms(symptoms)
 
-    // Save conversation to Firebase - UPDATED to user-specific subcollection
+    
     const userId = clerkUser.id
     const userDiagnosisRef = db.collection(`users/${userId}/diagnosis`)
     
@@ -85,16 +81,15 @@ export async function POST(request: NextRequest) {
       symptoms, 
       answer, 
       type: "text",
-      createdAt: admin.firestore.FieldValue.serverTimestamp(), // Better timestamp
-      // Note: No need to store userId here since it's in the path
+      createdAt: admin.firestore.FieldValue.serverTimestamp(), 
     })
 
     console.log(`Diagnosis saved for user ${userId} in users/${userId}/diagnosis`)
 
-    // Return the same response as before
+   
     return NextResponse.json({ 
       diagnosis: answer,
-      // Add for debugging if needed
+  
       debug: {
         userId: userId,
         savedTo: `users/${userId}/diagnosis`,

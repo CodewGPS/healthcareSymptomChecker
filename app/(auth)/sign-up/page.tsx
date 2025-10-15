@@ -2,6 +2,7 @@ import { SignUp } from '@clerk/nextjs'
 
 export default function SignUpPage() {
   return (
+<<<<<<< HEAD
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center fade-in">
@@ -33,6 +34,16 @@ export default function SignUpPage() {
             }}
           />
         </div>
+=======
+    <div className="flex flex-col items-center space-y-4 space-x-4">
+      <div className="text-center">
+        <h1 className="text-xl font-medium text-white mb-1">
+          Sign Up at Arogya AI
+        </h1>
+        <p className="text-gray-300 text-sm">
+          Create an account to access AI-powered health insights
+        </p>
+>>>>>>> upstream/main
       </div>
     </div>
   )

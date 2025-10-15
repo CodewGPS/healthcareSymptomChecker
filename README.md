@@ -1,6 +1,6 @@
-## Healthcare Symptom Checker
+## Arogya AI - Healthcare Symptom Checker
 
-Educational app to input symptoms and receive probable conditions and recommended next steps. This project includes a backend API that queries an LLM, optional image/audio inputs, and an authenticated history stored in Firebase. All outputs include safety disclaimers and are for educational purposes only.
+Educational app to input symptoms and receive probable conditions and recommended next steps. This project includes a backend API that queries OpenAI models (text: gpt-4o-mini, image: gpt-4.1-mini, speech-to-text: whisper-1), optional image/audio inputs, and an authenticated history stored in Firebase. All outputs include safety disclaimers and are for educational purposes only.
 
 > Important: This app does not provide medical advice, diagnosis or treatment. Always consult a qualified healthcare professional.
 
@@ -51,6 +51,12 @@ NEXT_PUBLIC_FIREBASE_APP_ID=...
 
 Additionally, place your Firebase Admin service account JSON at the project root as `firebase-service-account.json` (path referenced by API routes). Keep this file out of source control.
 
+## Requirements
+- Node.js 18+ (recommended: 20+)
+- An OpenAI API key with access to `gpt-4o-mini`, `gpt-4.1-mini`, and `whisper-1`
+- A Firebase project (Firestore enabled) and a service account JSON
+- A Clerk application configured for your local and deployed URLs
+
 ## Installation & Run
 ```bash
 npm install
@@ -87,6 +93,9 @@ Response:
 Storage:
 - Saves a document under `users/{clerkUserId}/diagnosis` with `symptoms`, `answer`, `type: "text"`, and timestamp.
 
+Auth:
+- Requires a valid Clerk session (`currentUser`).
+
 ### POST /api/check-image
 Analyze an uploaded image (e.g., skin rash) using vision capabilities.
 
@@ -108,6 +117,9 @@ Response:
 Storage:
 - Saves a document under `users/{clerkUserId}/diagnosis` with `imageName`, `imageData` (data URI), `answer`, `type: "image"`.
 
+Auth:
+- Requires a valid Clerk session (`currentUser`).
+
 ### POST /api/stream-audio
 Transcribe audio (patient narrative) with Whisper and forward to `/api/check-text` for analysis.
 
@@ -128,24 +140,36 @@ Response:
 Storage:
 - Adds a document in `queries` with `audioTranscription`, `answer`, and `createdAt`.
 
+Auth:
+- Does not itself check `currentUser`. The forwarded call to `/api/check-text` will include cookies if present; otherwise, `diagnosis` may be `null` and only the transcription is returned.
+
 ## Prompting & Safety
 The text analysis uses a structured prompt to ensure:
 - Summarized symptoms and critical red flags
-- 1–2 probable conditions with short reasoning
+- Probable conditions with appropriate Reasoning
 - Concrete next steps (home care, tests, when to seek urgent care)
 - Risk context (age, comorbidities, duration, severity)
 - Mandatory educational disclaimer
 
 Example user prompt:
-> "Based on these symptoms, suggest possible conditions and next steps with an educational disclaimer."
+> "I have been suffering from headaches and fever since the last 4 days, I am 23 , Male."
 
 Safety policy:
 - Outputs are informational/educational only; not a diagnosis
 - Encourage consulting healthcare professionals
 - Highlight urgent-care triggers for severe/worsening symptoms
 
-## Optional Frontend
+Data handling:
+- Image uploads are converted to data URIs and (in this demo) saved in Firestore; avoid storing sensitive PHI in production and prefer secure storage.
+- Do not commit `firebase-service-account.json` or any secrets to source control.
+
+## Frontend
 This repo includes a basic chat-style interface (`components/chat-interface.tsx`) for entering symptoms and viewing responses. It can be extended with structured forms and validation.
+
+Quick UI flow:
+- Sign in via routes under `app/(auth)`
+- Use the chat interface to submit symptoms as text; results appear in `components/chat-messages.tsx`
+- Optional: upload an image via the UI (if enabled) or call the API directly
 
 ## Development Notes
 - Authentication: Routes such as `check-text` and `check-image` expect a valid Clerk session (`currentUser`). Ensure the app sign-in flow is configured via files in `app/(auth)`.
@@ -160,8 +184,6 @@ npm run start    # start production server
 npm run lint     # run eslint
 ```
 
-## Deployment
-- Recommended: Vercel for Next.js. Configure all environment variables and upload your Firebase service account via Vercel encrypted files/variables. Ensure Clerk is set up with the correct URL origins and keys.
 
 ## Evaluation Mapping
 - Correctness: Deterministic prompt structure, guarded inputs, typed routes
@@ -169,12 +191,6 @@ npm run lint     # run eslint
 - Safety disclaimers: Mandatory disclaimer in every answer
 - Code design: Clear separation of API routes, auth, and persistence; typed TS; minimal coupling
 
-## Demo
-- Record a short screen capture:
-  1. Sign up/sign in
-  2. Enter symptoms in the UI and submit
-  3. Show the API response and saved history in UI (or Firestore)
-  4. Optionally demo image upload and audio transcription
 
 ## License
 For educational use. Review third-party API terms (OpenAI, Clerk, Firebase) before production use.
