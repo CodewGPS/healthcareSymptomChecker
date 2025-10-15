@@ -1,8 +1,7 @@
 'use client'
-
-import { ChatInterface } from '@/components/chat-interface'
 import { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
+import { ChatInterface } from '@/components/chat-interface'
 
 export default function DashboardPage() {
   const { user } = useUser()
@@ -20,6 +19,7 @@ export default function DashboardPage() {
     <div className="h-full flex flex-col">
       <div className="flex-1 p-6">
         <div className="max-w-4xl mx-auto h-full">
+<<<<<<< HEAD
           <div className="mb-8 fade-in">
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
@@ -40,6 +40,15 @@ export default function DashboardPage() {
                 You can describe them through text, voice recordings, or upload images for analysis.
               </p>
             </div>
+=======
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-white mb-2">
+              Hello, {user?.firstName || 'there'}! 👋
+            </h1>
+            <p className="text-gray-300">
+              I'm here to help analyze your symptoms. You can describe them through text, voice, or images.
+            </p>
+>>>>>>> upstream/main
           </div>
           <ChatInterface />
         </div>

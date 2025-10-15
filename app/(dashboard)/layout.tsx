@@ -1,6 +1,11 @@
-import { Sidebar } from '@/components/sidebar'
-import { Header } from '@/components/header'
+// Export your actual layout component here, for example:
+const DashboardLayout = ({ children }: { children: React.ReactNode }) => (
+  <div>
+	{children}
+  </div>
+);
 
+<<<<<<< HEAD
 export default function DashboardLayout({
   children,
 }: {
@@ -18,3 +23,6 @@ export default function DashboardLayout({
     </div>
   )
 }
+=======
+export default DashboardLayout;
+>>>>>>> upstream/main
