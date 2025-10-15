@@ -2,6 +2,7 @@ import { SignIn } from '@clerk/nextjs'
 
 export default function SignInPage() {
   return (
+<<<<<<< HEAD
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center fade-in">
@@ -33,6 +34,16 @@ export default function SignInPage() {
             }}
           />
         </div>
+=======
+    <div className="flex flex-col items-center space-y-6">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-white mb-2">
+          Arogya AI
+        </h1>
+        <p className="text-gray-300">
+          Sign in to start your health consultation
+        </p>
+>>>>>>> upstream/main
       </div>
     </div>
   )
