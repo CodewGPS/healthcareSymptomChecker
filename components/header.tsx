@@ -14,17 +14,8 @@ export function Header() {
             <Activity className="h-6 w-6 text-primary-foreground" />
           </div>
           <div>
-<<<<<<< HEAD
-            <h1 className="font-bold text-foreground text-lg md:text-xl leading-tight flex items-center gap-2">
-              Healthcare AI
-              <Badge variant="secondary" className="text-xs px-2 py-0.5">
-                <Sparkles className="h-3 w-3 mr-1" />
-                AI-Powered
-              </Badge>
-=======
             <h1 className="font-semibold text-white text-lg md:text-xl leading-tight">
             Arogya AI
->>>>>>> upstream/main
             </h1>
             <p className="text-xs md:text-sm text-muted-foreground tracking-wide">
               Intelligent Symptom Analysis
