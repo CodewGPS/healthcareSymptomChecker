@@ -200,6 +200,7 @@ body {
 .pulse-recording {
   animation: pulse-recording 1s infinite;
 }
+<<<<<<< HEAD
 
 .fade-in {
   animation: fade-in 0.3s ease-out;
@@ -250,4 +251,20 @@ body {
 .dark .glass {
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.1);
+=======
+@layer utilities {
+  @keyframes gradient-x {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+  
+  .animate-gradient-y {
+    background-size: 400% 400%;
+    animation: gradient-x 10s ease infinite;
+  }
+>>>>>>> upstream/main
 }
