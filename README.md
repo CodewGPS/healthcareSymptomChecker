@@ -15,7 +15,7 @@ Educational app to input symptoms and receive probable conditions and recommende
 
 ## Tech Stack
 - **Next.js 15.5.5** with App Router (TypeScript, React 19.1.0)
-- **OpenAI API** for reasoning (text: gpt-4o-mini, image: gpt-4o-mini, speech-to-text: whisper-1)
+- **OpenAI API** for reasoning (text: gpt-4.1-mini, image: gpt-4.1-mini, speech-to-text: whisper-1)
 - **Clerk 6.33.3** for authentication
 - **Firebase 12.4.0** Admin + Firestore for server-side persistence; Firebase Web SDK for client
 - **Tailwind CSS 4.1.14** + **Radix UI** (components in `components/ui`)
