@@ -1,6 +1,9 @@
 ## Arogya AI - Healthcare Symptom Checker
 
-Educational app to input symptoms and receive probable conditions and recommended next steps. This project includes a backend API that queries OpenAI models (text: gpt-4o-mini, image: gpt-4.1-mini, speech-to-text: whisper-1), optional image/audio inputs, and an authenticated history stored in Firebase. All outputs include safety disclaimers and are for educational purposes only.
+Educational app to input symptoms and receive probable conditions and recommended next steps. This project includes a backend API that queries OpenAI models (text: gpt-4o-mini, image: gpt-4o-mini, speech-to-text: whisper-1), optional image/audio inputs, and an authenticated history stored in Firebase. All outputs include safety disclaimers and are for educational purposes only.
+
+> **🌐 Live Demo:** [https://arogya-ai-health-checker.vercel.app/](https://arogya-ai-health-checker.vercel.app/)  
+> **📁 Source Code:** [https://github.com/vimedha/healthcareSymptomChecker](https://github.com/vimedha/healthcareSymptomChecker)
 
 > Important: This app does not provide medical advice, diagnosis or treatment. Always consult a qualified healthcare professional.
 
@@ -11,20 +14,58 @@ Educational app to input symptoms and receive probable conditions and recommende
 - Optionally store user query history
 
 ## Tech Stack
-- Next.js App Router (TypeScript, React)
-- OpenAI API for reasoning (text, images, speech-to-text)
-- Clerk for authentication
-- Firebase Admin + Firestore for server-side persistence; Firebase Web SDK for client
-- Tailwind CSS + Radix UI (components in `components/ui`)
+- **Next.js 15.5.5** with App Router (TypeScript, React 19.1.0)
+- **OpenAI API** for reasoning (text: gpt-4o-mini, image: gpt-4o-mini, speech-to-text: whisper-1)
+- **Clerk 6.33.3** for authentication
+- **Firebase 12.4.0** Admin + Firestore for server-side persistence; Firebase Web SDK for client
+- **Tailwind CSS 4.1.14** + **Radix UI** (components in `components/ui`)
+- **Framer Motion 12.23.24** for animations
+- **React Markdown 10.1.0** for formatted responses
+- **RecordRTC 5.6.2** for audio recording
 
 ## Project Structure
-- API routes
-  - `app/api/check-text/route.ts`: Analyze symptom text with LLM; saves per-user results
-  - `app/api/check-image/route.ts`: Vision analysis for uploaded image; saves per-user result
-  - `app/api/stream-audio/route.ts`: Transcribe audio via Whisper then forwards to text analysis
-- Client
-  - `components/chat-interface.tsx`, `components/chat-input.tsx`, `components/chat-messages.tsx` (UI)
-  - `lib/firebase.ts` (client Firestore init)
+```
+app/
+├── (auth)/                    # Authentication pages
+│   ├── layout.tsx
+│   ├── sign-in/page.tsx
+│   └── sign-up/page.tsx
+├── (dashboard)/               # Dashboard layout
+│   └── layout.tsx
+├── api/                       # API routes
+│   ├── check-text/route.ts    # Analyze symptom text with LLM; saves per-user results
+│   ├── check-image/route.ts   # Vision analysis for uploaded image; saves per-user result
+│   └── stream-audio/route.ts  # Transcribe audio via Whisper then forwards to text analysis
+├── dashboard/                 # Main dashboard
+│   ├── layout.tsx
+│   └── page.tsx
+├── globals.css               # Global styles
+├── layout.tsx                # Root layout with ClerkProvider
+└── page.tsx                  # Landing page
+
+components/
+├── chat-interface.tsx        # Main chat UI component
+├── chat-messages.tsx         # Message display component
+├── chat-sidebar.tsx          # Chat history sidebar
+├── header.tsx                # App header
+├── sidebar.tsx               # Main sidebar
+└── ui/                       # Radix UI components
+    ├── avatar.tsx
+    ├── badge.tsx
+    ├── button.tsx
+    ├── card.tsx
+    ├── dialog.tsx
+    ├── dropdown-menu.tsx
+    ├── input.tsx
+    ├── scroll-area.tsx
+    ├── separator.tsx
+    ├── sonner.tsx
+    └── textarea.tsx
+
+lib/
+├── firebase.ts               # Firebase configuration
+└── utils.ts                  # Utility functions
+```
 
 ## Environment Variables
 Create a `.env.local` at the repo root:
@@ -39,6 +80,7 @@ CLERK_SECRET_KEY=sk_...
 
 # Firebase Admin (server)
 FIREBASE_DB_URL=https://<your-project>.firebaseio.com
+FIREBASE_SERVICE_ACCOUNT={"type":"service_account","project_id":"..."}
 
 # Firebase Web (client)
 NEXT_PUBLIC_FIREBASE_API_KEY=...
@@ -49,13 +91,14 @@ NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
 NEXT_PUBLIC_FIREBASE_APP_ID=...
 ```
 
-Additionally, place your Firebase Admin service account JSON at the project root as `firebase-service-account.json` (path referenced by API routes). Keep this file out of source control.
+**Important:** The `FIREBASE_SERVICE_ACCOUNT` should contain the entire service account JSON as a string. Do not create a separate JSON file.
 
 ## Requirements
-- Node.js 18+ (recommended: 20+)
-- An OpenAI API key with access to `gpt-4o-mini`, `gpt-4.1-mini`, and `whisper-1`
-- A Firebase project (Firestore enabled) and a service account JSON
-- A Clerk application configured for your local and deployed URLs
+- **Node.js 18+** (recommended: 20+)
+- An **OpenAI API key** with access to `gpt-4o-mini` and `whisper-1`
+- A **Firebase project** (Firestore enabled) and a service account JSON
+- A **Clerk application** configured for your local and deployed URLs
+- Modern browser with microphone access for audio recording
 
 ## Installation & Run
 ```bash
@@ -120,6 +163,27 @@ Storage:
 Auth:
 - Requires a valid Clerk session (`currentUser`).
 
+### GET /api/check-image
+Retrieve a previously uploaded image by name.
+
+Request:
+```bash
+curl "http://localhost:3000/api/check-image?imageName=photo.jpg" \
+  -H "Cookie: <your_cookies_if_auth_required>"
+```
+
+Response:
+```json
+{
+  "success": true,
+  "imageData": "data:<mime>;base64,...",
+  "diagnosis": "...",
+  "imageName": "photo.jpg",
+  "createdAt": "...",
+  "messageId": "..."
+}
+```
+
 ### POST /api/stream-audio
 Transcribe audio (patient narrative) with Whisper and forward to `/api/check-text` for analysis.
 
@@ -164,17 +228,38 @@ Data handling:
 - Do not commit `firebase-service-account.json` or any secrets to source control.
 
 ## Frontend
-This repo includes a basic chat-style interface (`components/chat-interface.tsx`) for entering symptoms and viewing responses. It can be extended with structured forms and validation.
+This repo includes a modern chat-style interface with multiple input methods and a sidebar for chat history.
 
-Quick UI flow:
-- Sign in via routes under `app/(auth)`
-- Use the chat interface to submit symptoms as text; results appear in `components/chat-messages.tsx`
-- Optional: upload an image via the UI (if enabled) or call the API directly
+### Features:
+- **Text Input**: Multi-line textarea with auto-resize for symptom descriptions
+- **Voice Recording**: Real-time audio recording with visual indicators
+- **Image Upload**: Support for image-based symptom analysis
+- **Chat History**: Persistent sidebar showing previous conversations
+- **Responsive Design**: Modern dark theme with smooth animations
+- **Real-time Feedback**: Loading states and error handling
+
+### UI Components:
+- `ChatInterface`: Main chat component with input controls
+- `ChatMessages`: Message display with markdown rendering
+- `ChatSidebar`: Chat history and user management
+- `Header`: Application header with navigation
+
+### Quick UI Flow:
+1. Sign in via routes under `app/(auth)`
+2. Access dashboard at `/dashboard`
+3. Use text, voice, or image inputs to describe symptoms
+4. View AI responses with safety disclaimers
+5. Access chat history via hamburger menu
 
 ## Development Notes
-- Authentication: Routes such as `check-text` and `check-image` expect a valid Clerk session (`currentUser`). Ensure the app sign-in flow is configured via files in `app/(auth)`.
-- Service Account: The server uses Admin SDK via `firebase-service-account.json`. Do not expose this to the client.
-- Data Model: Per-user history at `users/{userId}/diagnosis` for text/image; general `queries` collection for audio transcription forwarding.
+- **Authentication**: All API routes except `stream-audio` require a valid Clerk session (`currentUser`). Ensure the app sign-in flow is configured via files in `app/(auth)`.
+- **Service Account**: The server uses Firebase Admin SDK via the `FIREBASE_SERVICE_ACCOUNT` environment variable containing the JSON as a string.
+- **Data Model**: 
+  - Per-user history at `users/{userId}/diagnosis` for text/image queries
+  - General `queries` collection for audio transcription forwarding
+  - All documents include timestamps and content metadata
+- **Audio Recording**: Uses browser MediaRecorder API; requires HTTPS or localhost for microphone access
+- **Image Storage**: Images are converted to base64 data URIs and stored in Firestore (consider cloud storage for production)
 
 ## Scripts
 ```bash
